@@ -1,139 +1,72 @@
 <!DOCTYPE html>
 <html lang="en-us">
-
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Unity WebGL Player | Bemu</title>
-  <link rel="shortcut icon" href="TemplateData/favicon.ico">
-  <link rel="stylesheet" href="TemplateData/style.css">
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Bemu</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+    
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+        }
 
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: black;
-      /* Optional: Background color */
-    }
+        #unity-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    #unity-container {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+            background: #231F20;
+        }
 
-    canvas {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-    }
+        /* Force Landscape Mode */
+        @media screen and (orientation: portrait) {
+            body::before {
+                content: "Rotate your device to landscape mode to play.";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-size: 24px;
+                text-align: center;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 20px;
+                border-radius: 10px;
+            }
 
-    /* Centered Loading Bar */
-    #unity-loading-bar {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: auto;
-    }
-
-    #unity-progress-bar-empty {
-      width: 200px;
-      height: 10px;
-      background-color: #444;
-      border-radius: 5px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-    }
-
-    #unity-progress-bar-full {
-      height: 100%;
-      background-color: #09f;
-      transition: width 0.3s ease-in-out;
-    }
-
-    /* Hide Unity Logo & Footer */
-    #unity-footer,
-    #unity-warning,
-    #unity-logo {
-      display: none;
-    }
-
-    /* Force Landscape Mode */
-    @media screen and (orientation: portrait) {
-      body::before {
-        content: "Rotate your device to landscape mode to play.";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        font-size: 24px;
-        text-align: center;
-        background: rgba(0, 0, 0, 0.8);
-        padding: 20px;
-        border-radius: 10px;
-      }
-
-      #unity-container {
-        display: none;
-      }
-    }
-  </style>
+            #unity-container {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <div id="unity-container">
-    <canvas id="unity-canvas" tabindex="-1"></canvas>
-    <div id="unity-loading-bar">
-      <div id="unity-progress-bar-empty">
-        <div id="unity-progress-bar-full"></div>
-      </div>
+    <div id="unity-container">
+        <canvas id="unity-canvas" tabindex="-1"></canvas>
     </div>
-  </div>
 
-  <script>
-    var container = document.querySelector("#unity-container");
-        var canvas = document.querySelector("#unity-canvas");
-        var loadingBar = document.querySelector("#unity-loading-bar");
-        var progressBarFull = document.querySelector("#unity-progress-bar-full");
-
-        var buildUrl = "Build";
-        var loaderUrl = buildUrl + "/5336a4b2c43054286fd70b1faa467eee.loader.js";
-        var config = {
-            dataUrl: buildUrl + "/40703f9a91c800ffa79897d04049123a.data.unityweb",
-            frameworkUrl: buildUrl + "/82a65a875f5e29083d33e13d2aab0a8e.framework.js.unityweb",
-            codeUrl: buildUrl + "/308dd087001f07cc15c22302e12c8db9.wasm.unityweb",
-            streamingAssetsUrl: "StreamingAssets",
-            companyName: "Raims Technologies",
-            productName: "Bemu",
-            productVersion: "1.0",
-        };
-
-        // Mobile Optimization: Enable full viewport scaling
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-
+    <script src="Build/5336a4b2c43054286fd70b1faa467eee.loader.js"></script>
+    <script>
         function resizeCanvas() {
+            var canvas = document.querySelector("#unity-canvas");
             canvas.style.width = "100%";
             canvas.style.height = "100%";
         }
@@ -141,22 +74,15 @@
         window.addEventListener("resize", resizeCanvas);
         window.addEventListener("load", resizeCanvas);
 
-        loadingBar.style.display = "block";
-
-        var script = document.createElement("script");
-        script.src = loaderUrl;
-        script.onload = () => {
-            createUnityInstance(canvas, config, (progress) => {
-                progressBarFull.style.width = 100 * progress + "%";
-            }).then((unityInstance) => {
-                loadingBar.style.display = "none";
-            }).catch((message) => {
-                alert(message);
-            });
-        };
-
-        document.body.appendChild(script);
-  </script>
+        createUnityInstance(document.querySelector("#unity-canvas"), {
+            dataUrl: "Build/b0db480810990723455d0f8713bfd2d4.data.unityweb",
+            frameworkUrl: "Build/06afe01c08b1eebc865d152e0bafd7b3.framework.js.unityweb",
+            codeUrl: "Build/9d2a0588504c7e7aa8c8a34b4677ff29.wasm.unityweb",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "Raims Technologies",
+            productName: "Bemu",
+            productVersion: "1.0",
+        });
+    </script>
 </body>
-
 </html>
